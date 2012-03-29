@@ -1,0 +1,22 @@
+- Get a debian server
+- do:
+    apt-get update
+    apt-get upgrade
+    #the next step will ask you to pick a mysql root password; leave it empty
+    apt-get install libapache2-mod-php5 mysql-server php5-mysql git
+    cd /var
+    git clone git@github.com:michielbdejong/lamp.git
+    rmdir www
+    mv lamp www
+    a2enmod rewrite
+
+- edit /etc/apache2/sites-enabled/000-default, and in the 'Directory /var/www' section, add:
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^.*$ index.php
+
+- if you want to customize your server, edit /var/www/config.php
+- finally, do:
+    /etc/init.d/apache2 restart
+
+- browse to your server and follow instructions on the page
