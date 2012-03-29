@@ -4,7 +4,7 @@ class Config {
   public static $mysqlHost = 'localhost',
     $mysqlUsr = 'root',
     $mysqlPwd = '',
-    $serverHost = null,
-    $serverProtocol = null,
-    $usersHost = null;
+    $serverHost = 'lamp.unhosted.org',
+    $serverProtocol = 'http',
+    $usersHost = 'iriscouch.com';
 }
