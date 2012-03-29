@@ -7,8 +7,8 @@ class Webfinger {
       header('Content-Type: application/xrd+xml');
       echo '<?xml version="1.0" encoding="UTF-8"?>'."\n"
         .'  <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:hm="http://host-meta.net/xrd/1.0">'."\n"
-        .'  <hm:Host xmlns="http://host-meta.net/xrd/1.0">'.$_SERVER['SERVER_NAME'].'</hm:Host>'."\n"
-        .'    <Link rel="lrdd" template="http'.(isset($_SERVER['HTTPS'])?'s':'').'://'.$_SERVER['SERVER_NAME'].'/webfinger/?q={uri}">'."\n"
+        .'  <hm:Host xmlns="http://host-meta.net/xrd/1.0">'.Config::$serverHost.'</hm:Host>'."\n"
+        .'    <Link rel="lrdd" template="'.Config::$serverProtocol.'://'.Config::$serverHost.'/webfinger/?q={uri}">'."\n"
         .'    </Link>'."\n"
         .'  </XRD>'."\n"
         .'<xml>'."\n";
@@ -21,23 +21,19 @@ class Webfinger {
     $userName = '';
     if($_GET['q']) {
       $bits = explode('@', $_GET['q']);
-      if(count($bits)==2 && $bits[1] == $_SERVER['SERVER_NAME']) {
+      if(count($bits)==2 && $bits[1] == Config::$usersHost) {
         $userName = $bits[0];
       }
     }
     if(substr($userName, 0, 5) == 'acct:') {
       $userName = substr($userName, 5);
     }
-    if(isset($_SERVER['HTTPS'])) {
-      $baseAddress = 'https://'.$_SERVER['SERVER_NAME'];
-    } else {
-      $baseAddress = 'http://'.$_SERVER['SERVER_NAME'];
-    }
+    $baseAddress = Config::$serverProtocol.'://'.Config::$serverHost;
     if($userName) {
       header('Access-Control-Allow-Origin: *');
       echo '<?xml version="1.0" encoding="UTF-8"?>'."\n"
         .'  <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:hm="http://host-meta.net/xrd/1.0">'."\n"
-        .'    <hm:Host xmlns="http://host-meta.net/xrd/1.0">'.$_SERVER['SERVER_NAME'].'</hm:Host>'."\n"
+        .'    <hm:Host xmlns="http://host-meta.net/xrd/1.0">'.Config::$serverHost.'</hm:Host>'."\n"
         .'    <Link>'."\n"//this links the subject user to her storage:
         .'      <Rel>http://www.w3.org/community/unhosted/wiki/RemoteStorage-2012.04#simple</Rel>'."\n"
         .'      <URI>'.$baseAddress.'/storage/'.$userName.'</URI>'."\n"

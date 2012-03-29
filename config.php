@@ -1,5 +1,10 @@
 <?php
 
-$mysql_host = 'localhost';
-$mysql_usr = 'root';
-$mysql_pwd = '';
+class Config {
+  public static $mysqlHost = 'localhost',
+    $mysqlUsr = 'root',
+    $mysqlPwd = '',
+    $serverHost = null,
+    $serverProtocol = null,
+    $usersHost = null;
+}
