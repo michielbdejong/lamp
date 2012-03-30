@@ -41,15 +41,23 @@ class Db {
     $result = mysql_query($query, self::$link) or die('Query failed: '. mysql_error());
     return $result;
   }
-  public static function getString($column, $table, $whereField, $whereValue) {
-    $result = self::doQuery('SELECT '.mysql_escape_string($column)
+  public static function getStrings($columns, $table, $whereClauses) {
+    $cols = array();
+    $clauses = array();
+    foreach($columns as $c) {
+      array_push($cols, mysql_escape_string($c));
+    }
+    foreach($whereClauses as $whereField => $whereValue) {
+      array_push($clauses, mysql_escape_string($whereField).'="'.mysql_escape_string($whereValue).'"');
+    }
+    $result = self::doQuery('SELECT '.implode(',', $cols)
       .' FROM '.mysql_escape_string($table)
-      .' WHERE '.mysql_escape_string($whereField).'="'.mysql_escape_string($whereValue).'"');
+      .' WHERE ('.implode(') AND (', $clauses).')');
     if(mysql_num_rows($result) != 1) {
       return null;
     }
-    $line = mysql_fetch_array($result);
-    return $line[0];
+    $line = mysql_fetch_array($result, MYSQL_NUM);
+    return $line;
   }
   public static function insert($table, $values) {
     return (self::doQuery('INSERT INTO '.$table.' VALUES ('

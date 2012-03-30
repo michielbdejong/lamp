@@ -5,8 +5,8 @@ require_once 'browserid.php';
 class Auth {
   static function getSecondaryAddress($primaryAddress) {
     //SELECT secondary FROM address WHERE primary = $primaryAddress:
-    $secondaryAddress = Db::getString('secondary_address', 'address', 'primary_address', $primaryAddress);
-    return $secondaryAddress ? $secondaryAddress : $primaryAddress;
+    $strings = Db::getStrings(array('secondary_address'), 'address', array('primary_address' => $primaryAddress));
+    return $strings ? $strings[0] : $primaryAddress;
   }
   static function checkAccess($assertion, $audience, $userAddress) {
     $authedUserAddress = Browserid::verifyAssertion($assertion, $audience);
@@ -20,7 +20,7 @@ class Auth {
       .'  xhr.onreadystatechange = function() {'."\n"
       .'    if(xhr.readyState == 4) {'."\n"
       .'      if(xhr.status == 200) {'."\n"
-      .'        //location=xhr.responseText;'."\n"
+      .'        location=xhr.responseText;'."\n"
       .'      }'."\n"
       .'    }'."\n"
       .'  };'."\n"
@@ -34,15 +34,15 @@ class Auth {
   }
   static function mergeScopes($scopeStr1, $scopeStr2) {
     $scopes = array();
-    for(explode(',', $scopeStr1) as $elt) {
+    foreach(explode(',', $scopeStr1) as $elt) {
       $parts = explode(':', $elt);
-      if(!isset($scopes['a'.$parts[0]]) || $scopes['a'.$parts[0]] == 'read') {
+      if(count($parts)==2 && (!isset($scopes[$parts[0].':']) || $scopes[$parts[0].':'] == 'read')) {
         $scopes[$parts[0].':'] = $parts[1];
       }
     }
-    for(explode(',', $scopeStr2) as $elt) {
+    foreach(explode(',', $scopeStr2) as $elt) {
       $parts = explode(':', $elt);
-      if(!isset($scopes['a'.$parts[0]]) || $scopes['a'.$parts[0]] == 'read') {
+      if(count($parts)==2 && (!isset($scopes[$parts[0].':']) || $scopes[$parts[0].':'] == 'read')) {
         $scopes[$parts[0].':'] = $parts[1];
       }
     }
@@ -50,22 +50,28 @@ class Auth {
     foreach($scopes as $k => $v) {
       //always keep the global scope; if there is no global one, keep everything; otherwise keep fulls on top of a global read
       if($k == ':' || !isset($scopes[':']) || ($scopes[':']=='read' && $v=='full')) {
-        $scopesStrs.push($k.$v);
+        array_push($scopesStrs, $k.$v);
       }
     }
     return implode(',', $scopesStrs);
   }
   static function processDecision($appHost, $scopesStr, $userAddress, $assertion, $redirectUri) {
     if(self::checkAccess($assertion, Config::$serverProtocol.'://'.Config::$serverHost, $userAddress)) {
-      list($token, $existingScope) = Db::getStrings(array('token', 'scope'), 'grants', array(
+      $strings = Db::getStrings(array('token', 'scope'), 'grants', array(
         'client_id' => $appHost,
         'user_address' => $userAddress
       ));
-      if(!token) {
+      if($strings) {
+        list($token, $existingScope) = $strings;
+        $newScope = self::mergeScopes($existingScope, $scopeStr);
+        if($existingScope != $newScope) {
+          var_dump($existingScope);
+          var_dump($newScope);
+          Db::update('grants', 'scope', $newScope, array('user_address' => $userAddress, 'client_id' => $appHost));
+        }
+      } else {
         $token = self::genToken();
         Db::insert('grants', array($userAddress, $token, $appHost, $scopesStr));
-      } else if($existingScope != $scopeStr) {
-        Db::update('grants', 'scope', self::mergeScopes($existingScope, $scopeStr), array('user_address' => $userAddress, 'client_id' => $appHost));
       }
       echo $redirectUri.'#access_token='.$token;
     }
