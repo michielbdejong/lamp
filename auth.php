@@ -27,10 +27,15 @@ class Auth {
       .'  xhr.send(assertion);'."\n"
       .'}, {requiredEmail: \''.self::getSecondaryAddress($userAddress).'\'});"></body></html>'."\n";
   }
+  static function genToken() {
+    list($usec, $sec) = explode(' ', microtime());
+    mt_srand((float) $sec + ((float) $usec * 100000));
+    return base64_encode(mt_rand());
+  }
   static function processDecision($appHost, $scopesStr, $userAddress, $assertion, $redirectUri) {
-    $token = self::checkAccess($assertion, Config::$serverProtocol.'://'.Config::$serverHost, $userAddress);
-    if($token) {
-      Db::insert('grants', $token, $appHost, $scopesStr);
+    if(self::checkAccess($assertion, Config::$serverProtocol.'://'.Config::$serverHost, $userAddress)) {
+      $token = self::genToken();
+      Db::insert('grants', array($userAddress, $token, $appHost, $scopesStr));
       echo $redirectUri.'#access_token='.$token;
     }
   }
@@ -62,7 +67,7 @@ class Auth {
             if($method == 'GET') {
               self::displayDialog($appHost, $scopes, $userAddress);
             } else {
-              self::processDecision($appHost, $get['scopes'], $userAddress, $post, $get['redirect_uri']);
+              self::processDecision($appHost, $get['scope'], $userAddress, $post, $get['redirect_uri']);
             }
           } else {
             echo 'cannot extract app domain from redirectUri';

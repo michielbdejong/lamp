@@ -15,8 +15,10 @@ class Db {
     self::doQuery('CREATE TABLE grants ('
       .'user_address VARCHAR(255), '
       .'token VARCHAR(255), '
+      .'client_id VARCHAR(255), '
       .'scope VARCHAR(255), '
-      .'PRIMARY KEY(user_address, token)'
+      .'PRIMARY KEY(user_address, client_id),'
+      .'INDEX(token)'//to speed up queries with: WHERE token='whatever'
       .')');
     self::doQuery('CREATE TABLE items ('
       .'user_address VARCHAR(255), '
@@ -48,5 +50,10 @@ class Db {
     }
     $line = mysql_fetch_array($result);
     return $line[0];
+  }
+  public static function insert($table, $values) {
+    return (self::doQuery('INSERT INTO '.$table.' VALUES ('
+      .'"'.implode('", "', $values).'"'
+      .')') != false);
   }
 }
