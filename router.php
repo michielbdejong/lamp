@@ -10,7 +10,7 @@ class Router {
   static function showNotFound($uri) {
      echo htmlentities($uri).' not found';
   }
-  public static function route($method, $uri, $data) {
+  public static function route($method, $uri, $data $get) {
 	  $parts = explode('/', $uri);
     if(count($parts)<3) {
 	    self::showWelcomePage();
@@ -18,7 +18,7 @@ class Router {
 	    switch($parts[1]) {
 	    case '.well-known': Webfinger::showWellKnown($uri); break;
 	    case 'webfinger': Webfinger::showLrdd($uri); break;
-	    case 'oauth': Auth::showOAuth($uri); break;
+	    case 'oauth': Auth::showOAuth($method, $uri, $data, $get); break;
 	    case 'storage':  Storage::showStorage($uri); break;
 	    default: self::showNotFound($uri);
 	    }
