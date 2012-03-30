@@ -5,8 +5,8 @@ require_once 'browserid.php';
 class Auth {
   static function getSecondaryAddress($primaryAddress) {
     //SELECT secondary FROM address WHERE primary = $primaryAddress:
-    $secondaryAddress = Db::getString('secondary', 'address', 'primary', $primaryAddress);
-    return $secondaryAddress || $primaryAddress;
+    $secondaryAddress = Db::getString('secondary_address', 'address', 'primary_address', $primaryAddress);
+    return $secondaryAddress ? $secondaryAddress : $primaryAddress;
   }
   static function checkAccess($assertion, $audience, $userAddress) {
     $authedUserAddress = Browserid::verifyAssertion($assertion, $audience);
@@ -20,9 +20,7 @@ class Auth {
     }
   }
   static function displayDialog($appHost, $scopes, $userAddress) {
-    var_dump($appHost);
-    var_dump($scopes);
-    var_dump($userAddress);
+    var_dump(self::getSecondaryAddress($userAddress));
   }
   public static function showOAuth($uri) {
     $uriParts = explode('?', $uri);
