@@ -28,7 +28,7 @@ class Auth {
       .'}, {requiredEmail: \''.self::getSecondaryAddress($userAddress).'\'});"></body></html>'."\n";
   }
   static function processDecision($appHost, $scopesStr, $userAddress, $assertion, $redirectUri) {
-    $token = self::checkAccess($assertion, Config::$serverProtocol+'://'+Config::$serverHost, $userAddress);
+    $token = self::checkAccess($assertion, Config::$serverProtocol.'://'.Config::$serverHost, $userAddress);
     if($token) {
       Db::insert('grants', $token, $appHost, $scopesStr);
       echo $redirectUri.'#access_token='.$token;
