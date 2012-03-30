@@ -32,10 +32,41 @@ class Auth {
     mt_srand((float) $sec + ((float) $usec * 100000));
     return base64_encode(mt_rand());
   }
+  static function mergeScopes($scopeStr1, $scopeStr2) {
+    $scopes = array();
+    for(explode(',', $scopeStr1) as $elt) {
+      $parts = explode(':', $elt);
+      if(!isset($scopes['a'.$parts[0]]) || $scopes['a'.$parts[0]] == 'read') {
+        $scopes[$parts[0].':'] = $parts[1];
+      }
+    }
+    for(explode(',', $scopeStr2) as $elt) {
+      $parts = explode(':', $elt);
+      if(!isset($scopes['a'.$parts[0]]) || $scopes['a'.$parts[0]] == 'read') {
+        $scopes[$parts[0].':'] = $parts[1];
+      }
+    }
+    $scopesStrs=array();
+    foreach($scopes as $k => $v) {
+      //always keep the global scope; if there is no global one, keep everything; otherwise keep fulls on top of a global read
+      if($k == ':' || !isset($scopes[':']) || ($scopes[':']=='read' && $v=='full')) {
+        $scopesStrs.push($k.$v);
+      }
+    }
+    return implode(',', $scopesStrs);
+  }
   static function processDecision($appHost, $scopesStr, $userAddress, $assertion, $redirectUri) {
     if(self::checkAccess($assertion, Config::$serverProtocol.'://'.Config::$serverHost, $userAddress)) {
-      $token = self::genToken();
-      Db::insert('grants', array($userAddress, $token, $appHost, $scopesStr));
+      list($token, $existingScope) = Db::getStrings(array('token', 'scope'), 'grants', array(
+        'client_id' => $appHost,
+        'user_address' => $userAddress
+      ));
+      if(!token) {
+        $token = self::genToken();
+        Db::insert('grants', array($userAddress, $token, $appHost, $scopesStr));
+      } else if($existingScope != $scopeStr) {
+        Db::update('grants', 'scope', self::mergeScopes($existingScope, $scopeStr), array('user_address' => $userAddress, 'client_id' => $appHost));
+      }
       echo $redirectUri.'#access_token='.$token;
     }
   }
