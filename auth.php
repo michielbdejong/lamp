@@ -12,32 +12,25 @@ class Auth {
     $authedUserAddress = Browserid::verifyAssertion($assertion, $audience);
     return ($authedUserAddress && ($authedUserAddress == $userAddress || $authedUserAddress == getSecondaryAddress($userAddress)));
   }
-  public static function process($assertion, $audience, $userAddress, $scopes, $app) {
-    if(checkAccess($assertion, $userAddress)) {
-      return getToken($userAddress, $scopes, $app);
-    } else {
-      return false;
-    }
-  }
   static function displayDialog($appHost, $scopes, $userAddress) {
     echo '<html><script src="https://browserid.org/include.js"></script>'."\n"
       .'<body><input type="submit" onclick="navigator.id.get(function(assertion) {'."\n"
       .'  var xhr = new XMLHttpRequest();'."\n"
-      .'  xhr.open(\'POST\', \'?\', true);'."\n"
+      .'  xhr.open(\'POST\', \'\', true);'."\n"
       .'  xhr.onreadystatechange = function() {'."\n"
       .'    if(xhr.readyState == 4) {'."\n"
       .'      if(xhr.status == 200) {'."\n"
-      .'        location=xhr.responseText;'."\n"
-      .'        '."\n"
+      .'        //location=xhr.responseText;'."\n"
       .'      }'."\n"
+      .'    }'."\n"
       .'  };'."\n"
       .'  xhr.send(assertion);'."\n"
       .'}, {requiredEmail: \''.self::getSecondaryAddress($userAddress).'\'});"></body></html>'."\n";
   }
   static function processDecision($appHost, $scopesStr, $userAddress, $assertion, $redirectUri) {
-    $token = process($assertion, Config::serverProtocol+'://'+Config::serverHost, $userAddress, $scopes, $appHost);
+    $token = self::checkAccess($assertion, Config::$serverProtocol+'://'+Config::$serverHost, $userAddress);
     if($token) {
-      Db::insert('grants', $token, $appHost, implode(',', $scopes));
+      Db::insert('grants', $token, $appHost, $scopesStr);
       echo $redirectUri.'#access_token='.$token;
     }
   }

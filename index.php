@@ -10,4 +10,4 @@ if(!Config::$serverProtocol) {
 if(!Config::$usersHost) {
   Config::$usersHost = $_SERVER['SERVER_NAME'];
 }
-Router::route($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], $_GET, file_get_contents('php://input'), $_GET);
+Router::route($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], file_get_contents('php://input'), $_GET);

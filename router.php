@@ -10,7 +10,7 @@ class Router {
   static function showNotFound($uri) {
      echo htmlentities($uri).' not found';
   }
-  public static function route($method, $uri, $data $get) {
+  public static function route($method, $uri, $data, $get) {
 	  $parts = explode('/', $uri);
     if(count($parts)<3) {
 	    self::showWelcomePage();

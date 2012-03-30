@@ -3,7 +3,7 @@
     apt-get update
     apt-get upgrade
     #the next step will ask you to pick a mysql root password; leave it empty
-    apt-get install libapache2-mod-php5 mysql-server php5-mysql git
+    apt-get install libapache2-mod-php5 mysql-server php5-mysql php5-curl git
     cd /var
     git clone git@github.com:michielbdejong/lamp.git
     rmdir www
