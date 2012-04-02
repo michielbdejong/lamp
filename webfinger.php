@@ -17,9 +17,9 @@ class Webfinger {
       header('Access-Control-Allow-Origin: *');
     }
   }
-  public static function showLrdd($uri) {
+  public static function showLrdd($get) {
     $userName = '';
-    if($_GET['q']) {
+    if($get['q']) {
       $bits = explode('@', $_GET['q']);
       if(count($bits)==2 && $bits[1] == Config::$usersHost) {
         $userName = $bits[0];

@@ -17,7 +17,7 @@ class Router {
 	  } else {
 	    switch($parts[1]) {
 	    case '.well-known': Webfinger::showWellKnown($uri); break;
-	    case 'webfinger': Webfinger::showLrdd($uri); break;
+	    case 'webfinger': Webfinger::showLrdd($get); break;
 	    case 'oauth': Auth::showOAuth($method, $uri, $data, $get); break;
 	    case 'storage':  Storage::showStorage($uri); break;
 	    default: self::showNotFound($uri);
