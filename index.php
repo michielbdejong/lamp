@@ -10,4 +10,11 @@ if(!Config::$serverProtocol) {
 if(!Config::$usersHost) {
   Config::$usersHost = $_SERVER['SERVER_NAME'];
 }
-Router::route($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], file_get_contents('php://input'), $_GET);
+$headers = getallheaders();
+if($headers && $headers['Authorization']) {
+  $authHeaderParts = explode(' ', $headers['Authorization']);
+  $token = $authHeaderParts[1];
+} else {
+  $token = '';
+}
+Router::route($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], file_get_contents('php://input'), $_GET, $token);
