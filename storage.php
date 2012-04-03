@@ -19,14 +19,41 @@ class Storage {
       $itemKey = implode('/', array_slice($uriParts, 4));
     }
     if($method == 'GET') {
-      if(self::tokenGoodForReading($userAddress, $category, $token) {
+      if(self::tokenGoodForReading($userAddress, $category, $token)) {
         $value = Db::getStrings(array('value'), 'items', array('user_address' => $userAddress, 'category' => $category, 'key_name' => $itemKey));
+        if($value) {
+          header('HTTP/1.0 200 OK');
+          echo($value);
+        } else {
+          header('HTTP/1.0 404 Not Found');
+        }
+      } else {
+        header('403 Access Denied');
       }
-   var_dump($userAddress);
-var_dump($category);var_dump($itemKey);
-      var_dump($token);
-var_dump($value);
+    } if($method == 'PUT') {
+      if(self::tokenGoodForWriting($userAddress, $category, $token)) {
+        $value = Db::setStrings(array('value' => $data), 'items', array('user_address' => $userAddress, 'category' => $category, 'key_name' => $itemKey));
+        if($value) {
+          header('HTTP/1.0 200 OK');
+          echo($value);
+        } else {
+          header('HTTP/1.0 404 Not Found');
+        }
+      } else {
+        header('403 Access Denied');
+      }
+    } if($method == 'DELETE') {
+      if(self::tokenGoodForWriting($userAddress, $category, $token)) {
+        $value = Db::deleteRow('items', array('user_address' => $userAddress, 'category' => $category, 'key_name' => $itemKey));
+        if($value) {
+          header('HTTP/1.0 200 OK');
+          echo($value);
+        } else {
+          header('HTTP/1.0 404 Not Found');
+        }
+      } else {
+        header('403 Access Denied');
+      }
     }
-    echo 'hi, this is your storage speaking';
   }
 }

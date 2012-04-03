@@ -59,9 +59,30 @@ class Db {
     $line = mysql_fetch_array($result, MYSQL_NUM);
     return $line;
   }
-  public static function insert($table, $values) {
-    return (self::doQuery('INSERT INTO '.$table.' VALUES ('
-      .'"'.implode('", "', $values).'"'
-      .')') != false);
+  public static function setStrings($columns, $table, $whereClauses) {
+    $pairsUpdate = array();
+    foreach($columns as $k => $v) {
+      $pairsUpdate[mysql_escape_string($k)] = mysql_escape_string($v);
+    }
+    $pairs = $pairsUpdate;
+    foreach($whereClauses as $k => $v) {
+      $pairs[mysql_escape_string($k)] = mysql_escape_string($v);
+    }
+    $str = 'INSERT INTO '.mysql_escape_string($table)
+      .' ('.implode(', ', array_keys($pairs))
+      .' VALUES ("'.implode('", "', $pairs).'")'
+      .' ON DUPLICATE UPDATE ';
+    foreach($pairsUpdate as $k => $v) {
+      $str+=$k.' = ".$v.'"';
+    }
+    return self::doQuery($str);
+  }
+  public static function deleteRow($table, $whereClauses) {
+    $clauses = array();
+    foreach($whereClauses as $whereField => $whereValue) {
+      array_push($clauses, mysql_escape_string($whereField).'="'.mysql_escape_string($whereValue).'"');
+    }
+    return (self::doQuery('DELETE FROM '.mysql_escape_string($table).' WHERE ('
+      .implode(') AND (', $clauses).')');
   }
 }
