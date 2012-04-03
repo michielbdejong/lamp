@@ -70,10 +70,10 @@ class Db {
     }
     $str = 'INSERT INTO '.mysql_escape_string($table)
       .' ('.implode(', ', array_keys($pairs))
-      .' VALUES ("'.implode('", "', $pairs).'")'
-      .' ON DUPLICATE UPDATE ';
+      .') VALUES ("'.implode('", "', $pairs).'")'
+      .' ON DUPLICATE KEY UPDATE ';
     foreach($pairsUpdate as $k => $v) {
-      $str+=$k.' = ".$v.'"';
+      $str .= $k.' = "'.$v.'"';
     }
     return self::doQuery($str);
   }
@@ -82,7 +82,7 @@ class Db {
     foreach($whereClauses as $whereField => $whereValue) {
       array_push($clauses, mysql_escape_string($whereField).'="'.mysql_escape_string($whereValue).'"');
     }
-    return (self::doQuery('DELETE FROM '.mysql_escape_string($table).' WHERE ('
+    return self::doQuery('DELETE FROM '.mysql_escape_string($table).' WHERE ('
       .implode(') AND (', $clauses).')');
   }
 }
