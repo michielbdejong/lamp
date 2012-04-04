@@ -23,7 +23,7 @@ class Storage {
         $value = Db::getStrings(array('value'), 'items', array('user_address' => $userAddress, 'category' => $category, 'key_name' => $itemKey));
         if($value) {
           header('HTTP/1.0 200 OK');
-          echo($value);
+          echo($value[0]);
         } else {
           header('HTTP/1.0 404 Not Found');
         }

@@ -37,6 +37,7 @@ class Db {
     mysql_select_db(Config::$mysqlDb) or self::createDb();
   }
   private static function doQuery($query) {
+    error_log($query);
     self::getLink();
     $result = mysql_query($query, self::$link) or die('Query failed: '. mysql_error());
     return $result;

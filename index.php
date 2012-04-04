@@ -11,7 +11,7 @@ if(!Config::$usersHost) {
   Config::$usersHost = $_SERVER['SERVER_NAME'];
 }
 $headers = getallheaders();
-if($headers && $headers['Authorization']) {
+if($headers && isset($headers['Authorization'])) {
   $authHeaderParts = explode(' ', $headers['Authorization']);
   $token = $authHeaderParts[1];
 } else {
