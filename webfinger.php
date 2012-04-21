@@ -19,15 +19,15 @@ class Webfinger {
     if($userName) {
       header('Access-Control-Allow-Origin: *');
       header('Content-Type: application/json; charset=UTF-8');
-      echo '{ "links": ['."\n"
-        .'  {'."\n"
-        .'    "rel":"http://www.w3.org/community/unhosted/wiki/rww-2012.04#simple",'."\n"
-        .'    "href":"'.$baseAddress.'/storage/'.$userName.'",'."\n"
-        .'    "properties":{'."\n"
-        .'      "http://www.w3.org/community/unhosted/wiki/pds-2012.04#oauth2-ig":"'.$baseAddress.'/auth/'.$userName.'",'."\n"
-        .'    }'."\n"
-        .'  }'."\n"
-        .']}'."\n";
+      echo '{"links":['
+        .'{'
+        .'"rel":"http://www.w3.org/community/unhosted/wiki/rww-2012.04#simple",'
+        .'"href":"'.$baseAddress.'/storage/'.$userName.'",'
+        .'"properties":{'
+        .'"http://www.w3.org/community/unhosted/wiki/pds-2012.04#oauth2-ig":"'.$baseAddress.'/auth/'.$userName.'"'
+        .'}'
+        .'}'
+        .']}';
     } else {
       header('HTTP/1.0 412 Precondition failed');
       header('Access-Control-Allow-Origin: *');
