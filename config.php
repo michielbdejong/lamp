@@ -8,7 +8,7 @@ class Config {
     $mysqlDb = 'remotestorage',
     $serverHost = 'lamp.unhosted.org',
     $serverProtocol = 'http',
-    $usersHost = 'unhosted.org';
+    $usersHost = 'lamp.unhosted.org';
 
   //behaviour:
   const BACKEND_MYSQL = 1,

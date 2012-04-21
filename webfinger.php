@@ -1,28 +1,15 @@
 <?php
 
 class Webfinger {
-  public static function showWellKnown($uri) {
-    if($uri=='/.well-known/host-meta') {
-      header('Access-Control-Allow-Origin: *');
-      header('Content-Type: application/xrd+xml');
-      echo '<?xml version="1.0" encoding="UTF-8"?>'."\n"
-        .'  <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:hm="http://host-meta.net/xrd/1.0">'."\n"
-        .'  <hm:Host xmlns="http://host-meta.net/xrd/1.0">'.Config::$serverHost.'</hm:Host>'."\n"
-        .'    <Link rel="lrdd" template="'.Config::$serverProtocol.'://'.Config::$serverHost.'/webfinger/?q={uri}">'."\n"
-        .'    </Link>'."\n"
-        .'  </XRD>'."\n"
-        .'<xml>'."\n";
-    } else {
-      header('HTTP/1.0 404 Not Found');
-      header('Access-Control-Allow-Origin: *');
-    }
-  }
-  public static function showLrdd($get) {
+  public static function showJrd($get) {
     $userName = '';
-    if($get['q']) {
-      $bits = explode('@', $_GET['q']);
+    if($get['resource']) {
+      $bits = explode('@', $_GET['resource']);
       if(count($bits)==2 && $bits[1] == Config::$usersHost) {
+        debug($userName);
         $userName = $bits[0];
+      } else {
+        debug($userName.' rejected for users host '.Config::$usersHost);
       }
     }
     if(substr($userName, 0, 5) == 'acct:') {
@@ -31,27 +18,16 @@ class Webfinger {
     $baseAddress = Config::$serverProtocol.'://'.Config::$serverHost;
     if($userName) {
       header('Access-Control-Allow-Origin: *');
-      echo '<?xml version="1.0" encoding="UTF-8"?>'."\n"
-        .'  <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:hm="http://host-meta.net/xrd/1.0">'."\n"
-        .'    <hm:Host xmlns="http://host-meta.net/xrd/1.0">'.Config::$serverHost.'</hm:Host>'."\n"
-        .'    <Link>'."\n"//this links the subject user to her storage:
-        .'      <Rel>http://www.w3.org/community/unhosted/wiki/RemoteStorage-2012.04#simple</Rel>'."\n"
-        .'      <URI>'.$baseAddress.'/storage/'.$userName.'</URI>'."\n"
-        .'      <Link>'."\n"//this links the storage to its auth server:
-        .'        <Rel>http://www.w3.org/community/unhosted/wiki/PersonalDataServices-2012.04#oauth</Rel>'."\n"
-        .'        <URI>'.$baseAddress.'/oauth/'.$userName.'</URI>'."\n"
-        .'      </Link>'."\n"
-        .'    </Link>'."\n"
-        .'    <Link>'."\n"//this links the subject user to our default socketHub instance:
-        .'      <Rel>http://www.w3.org/community/unhosted/wiki/socketHub-2012.04#sockjs</Rel>'."\n"
-        .'      <URI>wss:sockethub.unhosted.org</URI>'."\n"
-        .'      <Link>'."\n"//this links our socketHub instance to its auth server:
-        .'        <Rel>http://www.w3.org/community/unhosted/wiki/PersonalDataServices-2012.04#oauth+browserid</Rel>'."\n"
-        .'        <URI>https://auth.unhosted.org/browserid</URI>'."\n"
-        .'      </Link>'."\n"
-        .'    </Link>'."\n"
-        .'  </XRD>'."\n"
-        .'</xml>';
+      header('Content-Type: application/json; charset=UTF-8');
+      echo '{ "links": ['."\n"
+        .'  {'."\n"
+        .'    "rel":"http://www.w3.org/community/unhosted/wiki/rww-2012.04#simple",'."\n"
+        .'    "href":"'.$baseAddress.'/storage/'.$userName.'",'."\n"
+        .'    "properties":{'."\n"
+        .'      "http://www.w3.org/community/unhosted/wiki/pds-2012.04#oauth2-ig":"'.$baseAddress.'/auth/'.$userName.'",'."\n"
+        .'    }'."\n"
+        .'  }'."\n"
+        .']}'."\n";
     } else {
       header('HTTP/1.0 412 Precondition failed');
       header('Access-Control-Allow-Origin: *');

@@ -1,4 +1,8 @@
 <?php 
+function debug($str) {
+  error_log(var_export($str, true));
+}
+
 require_once('config.php');
 require_once('router.php');
 if(!Config::$serverHost) {

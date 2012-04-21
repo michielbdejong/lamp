@@ -12,12 +12,17 @@ class Router {
   }
   public static function route($method, $uri, $data, $get, $token) {
 	  $parts = explode('/', $uri);
+    debug($parts);
     if(count($parts)<3) {
 	    self::showWelcomePage();
 	  } else {
+      debug($parts[1]);
+      debug($get);
+      debug($method);
+      debug($uri);
+      debug($token);
 	    switch($parts[1]) {
-	    case '.well-known': Webfinger::showWellKnown($uri); break;
-	    case 'webfinger': Webfinger::showLrdd($get); break;
+	    case '.well-known': Webfinger::showJrd($get); break;
 	    case 'oauth': Auth::showOAuth($method, $uri, $data, $get); break;
 	    case 'storage':  Storage::showStorage($method, $uri, $data, $token); break;
 	    default: self::showNotFound($uri);
